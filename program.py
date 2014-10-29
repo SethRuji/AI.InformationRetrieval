@@ -7,9 +7,11 @@ from macpath import realpath
 from random import random
 
 dictArr= [];
+fileToTextDict= {}
 
 def main(funcToCall, query):
-    initializePresidentsArr()
+    initializeDicts()
+    
     print "searching for documents most relative to: "+ query
     if(funcToCall == "bm"):
         BM25ScoringFunction()
@@ -19,17 +21,18 @@ def main(funcToCall, query):
         TextualAlignment()
     printTopTen()
 
-def initializePresidentsArr():
-    fileList = os.listdir(os.getcwd()+"/Presidents")
+def initializeDicts():
+    presDirPath= os.getcwd()+"/Presidents"
+    fileList = os.listdir(presDirPath)
     for file in fileList:
         dictArr.append((file, 0))
+        fileToTextDict[file]= open(presDirPath+"/"+file).read().replace('\n', '') 
         
 def BM25ScoringFunction():
     print "bm25"
     
 def NGrams():
-    print "ngrams"
-    
+    print "ngrams"    
     
 def TextualAlignment():
     print "textAlign"
