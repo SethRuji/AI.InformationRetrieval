@@ -55,7 +55,31 @@ def getIDF(word):
     return idf
     
 def NGrams(doc, query):
+    words = query.split()
+    doc = fileToTextDict[doc]
+    docwords = doc.split()
+    nGram = list()
+    score = 0;
+    for x in range(0, 5):
+        word = docwords.pop(0)
+        nGram.append(word)
+        
+    if posQuery(words, nGram):
+        score = score + 1
+    while len(docwords) >0:
+        nGram.remove(0)
+        nGram.append(docwords.pop(0))
+        if posQuery(words, nGram):
+            score = score + 1
+    return score
+    
     return 0    
+
+def posQuery(words, nGram):
+    for word in words:
+        if not nGram.contains(word):
+            return False
+    return True
     
 def TextualAlignment(doc, query):
     return 0
