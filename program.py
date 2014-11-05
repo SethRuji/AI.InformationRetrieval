@@ -19,8 +19,8 @@ def main(funcToCall, query):
         scoreArr= map(lambda docName: (docName, BM25ScoringFunction(docName, query, avgdl)), fileToTextDict.keys())
 #     elif(funcToCall == "ng"):
 #         scoreArr.append((doc, NGrams(doc, query)))
-#     elif(funcToCall == "ta"):
-#         scoreArr.append((doc, TextualAlignment(doc, query)))
+    elif(funcToCall == "ptm"):
+        scoreArr= map(lambda docName: (docName, PassageTermMatch(docName, query)), fileToTextDict.keys())
     printTopTen(scoreArr)
 
 def initializeDict():
@@ -33,13 +33,15 @@ def BM25ScoringFunction(docName, queryWords, avgdl):
     vals=[]
     doc= fileToTextDict[docName]
     for word in queryWords.split(' '):
-        idf= getIDF(word)
+        idf= getB25IDF(word)
         termFrequency= Counter(doc.split(' '))[word]
+        #print docName +" qw:"+word+" idf: ", idf#termFrequency#" val:",(idf*(numerator/denom))
+        
         k1= 2#random.choice([1.2, 2])
         b= .75
         
         numerator= termFrequency*(k1+1)
-        denom= termFrequency+ k1 * (1-b+b* (getDocLengthWords(doc)/avgdl))
+        denom= termFrequency+ k1 * ((1-b)+b* (getDocLengthWords(doc)/avgdl))
         vals.append(idf*(numerator/denom))
     return sum(vals)
 
@@ -49,16 +51,30 @@ def getDocLengthWords(doc):
 def getAvgdl():
     return sum(map(lambda doc: getDocLengthWords(doc), fileToTextDict.values()))/len(fileToTextDict.keys())
     
-def getIDF(word):
-    nq= len([x for x in fileToTextDict.values() if word in x])
+def getB25IDF(word):
+    nq= len([x for x in fileToTextDict.values() if word in x.split(' ')])
+    
     idf=  math.log((len(fileToTextDict.keys())- nq + .5)/(nq+.5))
     return idf
+
+#===========================================================================================================================
     
 def NGrams(doc, query):
     return 0    
+
+#============================================================================================================================    
+
+def PassageTermMatch(docName, query):
+    w_ij_vals=map(lambda term: getPTMIDF(term) if (term in fileToTextDict[docName].split(' ')) else 0, query.split(' '))
+    numer = sum(w_ij_vals)
+    denom = sum(map(lambda term: getPTMIDF(term), query.split(' ')))
     
-def TextualAlignment(doc, query):
-    return 0
+    return numer/denom if numer and denom != 0.0 else 0.0
+    
+def getPTMIDF(term):
+    N= len(fileToTextDict.keys())
+    ct= len([x for x in fileToTextDict.values() if term in x.split(' ')])
+    return math.log(N/(ct+1))
 
 def printTopTen(scoreArr):
     print sorted(scoreArr, key=operator.itemgetter(1))[::-1][:10]
