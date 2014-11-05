@@ -17,8 +17,8 @@ def main(funcToCall, query):
     if(funcToCall == "bm"):
         avgdl = getAvgdl()
         scoreArr= map(lambda docName: (docName, BM25ScoringFunction(docName, query, avgdl)), fileToTextDict.keys())
-#     elif(funcToCall == "ng"):
-#         scoreArr.append((doc, NGrams(doc, query)))
+    elif(funcToCall == "ng"):
+        scoreArr= map(lambda docName: (docName, NGrams(docName, query)), fileToTextDict.keys())
     elif(funcToCall == "ptm"):
         scoreArr= map(lambda docName: (docName, PassageTermMatch(docName, query)), fileToTextDict.keys())
     printTopTen(scoreArr)
@@ -72,19 +72,21 @@ def NGrams(doc, query):
     if posQuery(words, nGram):
         score = score + 1
     while len(docwords) >0:
-        nGram.remove(0)
+ #       print nGram
+        nGram.pop(0)
         nGram.append(docwords.pop(0))
         if posQuery(words, nGram):
             score = score + 1
     return score
     
-    return 0    
+     
 
 
 def posQuery(words, nGram):
     for word in words:
-        if not nGram.contains(word):
+        if not word in nGram:
             return False
+    print "query ", words, " positive in nGram: ", nGram 
     return True
 
     
